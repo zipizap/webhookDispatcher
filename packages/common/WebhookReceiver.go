@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"fmt"
@@ -31,7 +31,8 @@ func WebhookReceiver(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	log.Infof("WebhookReceiver: Received new incommingWebhookRequest:\n%s", iJson)
+	log.Infof("WebhookReceiver: Received new incommingWebhookRequest")
+	log.Debug(iJson)
 
 	// Send a response back with the appropriate return code
 	w.WriteHeader(http.StatusOK)

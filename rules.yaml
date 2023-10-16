@@ -1,0 +1,24 @@
+- rule_name: myruleA
+  jmespath_conditions:
+    #condition-name: jmespath-expression that gives true or false
+    mycondition1-false: contains('return false', 'true')
+    mycondition2-true:  Method == 'POST'
+  forward_destinations:
+    #destionation-name;
+    #  url: http://myurl
+    mydestination1: 
+      url: http://localhost:8081/post
+
+- rule_name: myruleB
+  jmespath_conditions:
+    mycondition3-true: contains('return true', 'true')
+    mycondition4-true:  Method == 'POST'
+  forward_destinations:
+    mydestionation2:
+      url: http://localhost:8081/post
+    mydestionation3:
+      url: http://localhosty:8081/post
+    # beeceptor:
+    #   url: https://asd12e.free.beeceptor.com
+    # weebhook.site:
+    #   url: https://webhook.site/cc0eac33-3aa4-456f-90ff-5e5875e74e0b

@@ -1,10 +1,10 @@
-package main
+package common
 
 type ForwardedWebhook struct {
 	IncommingWebhookRequest *IncommingWebhookRequest
 	Rule                    *Rule
 
-	ForwardedWebhookResponse ForwardedWebhookResponse
+	ForwardedWebhookResponses map[RuleForwardDestinationName]*ForwardedWebhookResponse
 }
 
 // asJson returns json representation of ForwardedWebhook
