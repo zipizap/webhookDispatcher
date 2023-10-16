@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Webhook Data</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css"> -->
+    <style>
+        .table-hover tbody tr:not(.hiddenRow):hover {
+            background-color: #ADD8E6; /* Light Blue */
+            cursor: pointer;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script> -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js"></script> -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" integrity="sha512-GZ1RIgZaSc8rnco/8CXfRdCpDxRCphenIiZ2ztLy3XQfCbQUSCuk8IudvNHxkRA3oUg6q0qejgN/qqyG1duv5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+    <div id="resume" style="font-size: 10px; color: gray;"></div>
+    <div id="countdown" style="font-size: 10px; color: gray;"></div>
+    <div class="container">
+        <table class="table table-striped mt-5 table-hover table-borderless font-size: 12px">
+            <thead class="thead-light">
+                <tr>
+                    <th>IncommingWebhook</th>
+                    <th>Rule</th>
+                    <th>ForwardedWebhook(s)</th>
+                </tr>
+            </thead>
+            <tbody id="webhook-data">
+            </tbody>
+        </table>
+    </div>
+    <script>
+        var lastFetchedData = null;
+        var countdown = 5;
+        function update_table_from_getWebData() {
+            countdown = 5;
+            axios.get('/web/data')
+                .then(function (response) {
+                    const data = response.data;
+                    if (JSON.stringify(data) !== JSON.stringify(lastFetchedData)) {
+                        $('#resume').text(data.length + ' IncomminWebhooks x Rules processed');
+                        $('#webhook-data').empty();
+                        data.forEach(function(item, index) {
+                            let forwardedWebhooks = '';
+                            for (let key in item.ForwardedWebhookResponses) {
+                                forwardedWebhooks += `${key} - ${item.ForwardedWebhookResponses[key].Status}<br>`;
+                            }
+                            $('#webhook-data').append(`
+                                <tr data-toggle="collapse" data-target="#collapse${index}" class="accordion-toggle" data-toggle="tooltip" title="Click for details">
+                                    <td>${item.IncommingWebhookRequest.Timestamp}</td>
+                                    <td>${item.Rule.RuleName}<br>[${item.Rule.EvaluationResult.split(' ')[0]}]</td>
+                                    <td>${forwardedWebhooks}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" class="hiddenRow">
+                                        <div class="accordian-body collapse" id="collapse${index}">
+                                            <p>IncommingWebhook - webhook was received in this http-request</p>
+                                            <div id="Ieditor${index}" style="overflow: auto;"></div><br>
+                                            <p>Rule - is matched against the IncommingWebhook json</p>
+                                            <div id="Reditor${index}" style="overflow: auto;"></div><br>
+                                            <pre style="font-size: 8px;">${item.Rule.EvaluationResult}</pre><br>
+                                            <p>ForwardedWebhook(s) - webhook was sent and got back this http-response</p>
+                                            <div id="Feditor${index}" style="overflow: auto;"></div><br>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                        data.forEach(function(item, index) {
+                            const prefixes = ["I", "R", "F"];
+                            var aceValues = [item.IncommingWebhookRequest, item.Rule, item.ForwardedWebhookResponses]
+                            for (let i = 0; i < prefixes.length; i++) {
+                                const prefix = prefixes[i];
+                                var editor = ace.edit(`${prefix}editor${index}`);
+                                // resize editor
+                                editor.setOptions({
+                                    autoScrollEditorIntoView: true,
+                                    maxLines: 1000,
+                                    minLines: 2
+                                });
+                                var editorDiv = document.getElementById(`collapse${index}`);     // its container
+                                var doc = editor.getSession().getDocument();  // a reference to the doc
+                                editor.on("change", function() {
+                                    var lineHeight = editor.renderer.lineHeight;
+                                    editorDiv.style.height = lineHeight * doc.getLength() + "px";
+                                    editor.resize();
+                                });
+                                editor.resize();
+                                editor.renderer.updateFull();
+
+
+                                editor.setTheme("ace/theme/monokai");
+                                editor.session.setMode("ace/mode/json");
+                                editor.setReadOnly(true);
+                                editor.setValue(JSON.stringify(aceValues[i], null, 2));
+                            }
+                        });
+                        lastFetchedData = data;
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            $('[data-toggle="tooltip"]').tooltip();
+        }
+
+        $(document).ready(function() {
+            update_table_from_getWebData();
+            setInterval(update_table_from_getWebData, 5000);
+            setInterval(function() {
+                $('#countdown').text('Refresh in ' + countdown + ' secs');
+                countdown--;
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

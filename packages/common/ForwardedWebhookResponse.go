@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"encoding/json"
@@ -29,9 +29,12 @@ func NewForwardedWebhookResponse(fwdResp *http.Response) (forwardedWebhookRespon
 		if err != nil {
 			return nil, err
 		}
-		err = json.Unmarshal(fwdResBodyBytes, &fwdRespBodyIfc)
-		if err != nil {
-			return nil, err
+		if len(fwdResBodyBytes) > 0 {
+			err = json.Unmarshal(fwdResBodyBytes, &fwdRespBodyIfc)
+			if err != nil {
+				fwdRespBodyIfc = map[string]string{"bodyraw": string(fwdResBodyBytes)}
+				// return nil, err
+			}
 		}
 	}
 	forwardedWebhookResponse = &ForwardedWebhookResponse{
@@ -57,10 +60,10 @@ func NewForwardedWebhookResponse(fwdResp *http.Response) (forwardedWebhookRespon
 	return forwardedWebhookResponse, nil
 }
 
-// asJson returns json representation of ForwardedHttpResponse
+// AsJson returns json representation of ForwardedWebhookResponse
 //
-// Note that the json will sbow the value of ForwardedHttpResponse.Body but not
-// of ForwardedHttpResponse.Response.Body (which gets "hidden")
-func (o *ForwardedWebhookResponse) asJson() (jsonString string, err error) {
+// Note that the json will sbow the value of ForwardedWebhookResponse.Body but not
+// of ForwardedWebhookResponse.Response.Body (which gets "hidden")
+func (o *ForwardedWebhookResponse) AsJson() (jsonString string, err error) {
 	return _asJson(o)
 }

@@ -1,0 +1,57 @@
+# Self-explanatory example
+#
+#  - rule_name: myExampleRuleA
+#    jmespath_conditions:
+#      #condition-name: <jmespath-expression that gives true or false (boolean)>
+#      my-condition-always-true: contains('blue green red', 'blue')
+#      my-other-condition:  Method == 'POST'
+#      my-path: URL.Path == '/somethingspecial'
+#  #   bad-condition: "wtf"             # gives error
+#  #   non-bool-condition: Method       # gives error
+#    forward_destinations:
+#      #destionation-name;
+#      #  url: http://myurl
+#      my-destination-1: 
+#        url: http://localhost:8081/post
+
+
+#  - rule_name: myExampleRuleB
+#    jmespath_conditions:
+#      must-be-POST: Method == 'POST'
+#    forward_destinations:
+#      my-destination1:
+#        url: http://localhost:8081/post
+#      my-bad-destination:
+#        url: http://localhosty:8081/post             # produces error in log output
+#      mydestionationGet:
+#        url: http://localhost:8081/get
+#      beeceptor:
+#        url: https://asd12e.free.beeceptor.com
+#      weebhook.site:
+#        url: https://webhook.site/cc0eac33-3aa4-456f-90ff-5e5875e74e0b
+
+
+# Match Github Webhhoks that are Signed with a secret (ie, contain header "X-Hub-Signature")
+#
+- rule_name: github-signed-webhook
+  jmespath_conditions:
+    correct-method: Method == 'POST'
+    header-exists: Header."X-Hub-Signature" != null
+    header-contains: contains(Header."User-Agent"[0], 'GitHub')
+    body-json-navigate-fields: Body.repository.html_url == 'https://github.com/zipizap/webhookDispatcher'
+  forward_destinations:
+    validateWebhookSecretProgram:
+      url: http://localhost:8000/webhook
+    online-http-echo-beeceptor:
+      url: https://echo.free.beeceptor.com     # NOTE: short-lived url, get another from https://beeceptor.com/resources/http-echo/index.html
+
+
+
+# # Match all IncommingWebhooks (jmespath_conditions is empty )
+# #  
+# - rule_name: rule-that-matches-always
+#   jmespath_conditions:
+#   forward_destinations:
+#     my-destination-1:
+#       url: https://echo.free.beeceptor.com
+
