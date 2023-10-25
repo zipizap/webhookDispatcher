@@ -11,7 +11,7 @@ The daemon shows the **IncommingWebhook**, **Rules matching** and **ForwardedWeb
 - the ForwardedWebhook http-response (all headers, body, etc) 
 
 
-The **Rules** are defined in `./rules.yaml` file, with each **Rule** having its own 0-or-more `jmespath_conditions`, and 0-or-more `forward_destinations`. Each **IncommingWebhook** can match with 0-or-more **Rules**.
+The **Rules** are defined in `./rules.yaml` [file](./rules.yaml), with each **Rule** having its own 0-or-more `jmespath_conditions`, and 0-or-more `forward_destinations`. Each **IncommingWebhook** can match with 0-or-more **Rules**.
 
 A **Rule** matches an **IncommingWebhook**: 
 - if all conditions are true
@@ -37,7 +37,7 @@ Other features:
   # Inside directory containing rules.yaml
 
   #LOGLEVEL can be one of: "panic", "fatal", "error", "warning", "info" (default), "debug", "trace"
-  LOGLEVEL=info
+  export LOGLEVEL=info
   ./webhookDispatcher
   ```
 
@@ -50,7 +50,7 @@ Other features:
   - the rules match against IncommingWebhook, the json-representation of each IncommingWebhook - see it in http://localhost:8080/web 
   - create your own rules `jmespath_conditions` that *must* return boolean `true` or `false` (or an error will be shown in logs/webpage to help troubleshoot) 
   - to help fine-tune `jmespath_conditions`, use the web https://play.jmespath.org/ with IncommingWebhook json
-  - the `forward_destinations` 
+  - the `forward_destinations` can be tested using online-http-inspectors like [https://beeceptor.com](https://beeceptor.com/resources/http-echo/index.html) or https://webhook.site
   - when all the updates are saved in the `rules.yaml` file, resend a webhook and check in webpage how the Rule matched
 
 
@@ -70,7 +70,7 @@ docker run -p 8081:80 kennethreitz/httpbin
 clear; curl -kvX POST http://localhost:8080/post -H 'Content-Type: application/json' -d '{"myprop1":"myval1","myprop2":"myval2"}'
 ```
 
-### Test with zzz.locahost.run:80 --> localhost:8080
+### Test with zzz.localhost.run:80 --> localhost:8080
 
 ```
 # Shell 4: remote-port-forward tunnel from zzz.localhost.run:80 --> localhost:8080
@@ -88,7 +88,7 @@ clear; curl -kvX POST http://138aeba52799cd.lhr.life:80/post -H 'Content-Type: a
 ```
 #
 #
-#  Github-signed-webhook --> zzz.locahost.run:80 --> localhost:8080 --> localhost:8000
+#  Github-signed-webhook --> zzz.localhost.run:80 --> localhost:8080 --> localhost:8000
 #  
 #  |-------- (1) ---------|                       |------ (3) ------|
 #                          |-------- (2) --------|                   |------ (4) -----|
@@ -154,15 +154,14 @@ ssh -R 80:localhost:8080 localhost.run
 
 ### TODO & DONE
 
-
-[x] ./rules.yaml
-[x] conditions-in-same-rule AND'ed
-[x] improved log of rule evaluation
-[x] forward_destination -> forward_destinations []
-[x] IncommingWebhookRequest.Timestamp
-[x] env-var LOGLEVEL (default )
-[x] Works with empty-body
-[x] Works with all HTTP-verbs (GET, POST, PUT, etc)
-[x] Works with Content-type `application/json` 
-[x] Works with all signature headers
-...
+- [x] ./rules.yaml
+- [x] conditions-in-same-rule AND'ed
+- [x] improved log of rule evaluation
+- [x] forward_destination -> forward_destinations []
+- [x] IncommingWebhookRequest.Timestamp
+- [x] env-var LOGLEVEL (default )
+- [x] Works with empty-body
+- [x] Works with all HTTP-verbs (GET, POST, PUT, etc)
+- [x] Works with Content-type `application/json` 
+- [x] Works with all signature headers
+... and many others...
